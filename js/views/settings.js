@@ -6,9 +6,9 @@ import {
   getSettings, saveSettings, applyTheme, trackThemeSystem, CLEAR_CONFIRM_WORD,
   REMINDER_OPTIONS,
 } from '../storage.js';
-import { esc, todayStr, CURRENCIES } from '../utils.js';
+import { esc, todayStr, CURRENCIES, fullDate, bdTimeStr, getClockDrift, syncClock } from '../utils.js';
 import { icon } from '../icons.js';
-import { openModal, toast, confirmDialog, setError, clearErrors } from '../ui.js';
+import { openModal, toast, confirmDialog, setError, clearErrors, refresh } from '../ui.js';
 import { viewHeader, segmented, selectField } from '../components.js';
 import { notifSupported, permissionState, ensurePermission, testNotification, onReminderFire } from '../notifications.js';
 
@@ -34,6 +34,27 @@ export function render(container) {
       ${viewHeader({ title: 'Settings', subtitle: 'Appearance, notifications and data', iconName: 'settings' })}
 
       <div class="space-y-6">
+        <!-- Date & time -->
+        <section class="card px-5 py-4">
+          <h2 class="mb-3 flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">${icon('clock', 'h-4 w-4')}Date &amp; time</h2>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between gap-3 rounded-xl bg-neutral-50 px-3.5 py-2.5 dark:bg-neutral-800/50">
+              <span class="text-[13px] text-neutral-500 dark:text-neutral-400">Bangladesh date</span>
+              <span class="text-[13.5px] font-semibold text-neutral-800 dark:text-neutral-100">${fullDate(todayStr())}</span>
+            </div>
+            <div class="flex items-center justify-between gap-3 rounded-xl bg-neutral-50 px-3.5 py-2.5 dark:bg-neutral-800/50">
+              <span class="text-[13px] text-neutral-500 dark:text-neutral-400">Right now</span>
+              <span class="font-mono text-[13.5px] font-semibold tabular-nums text-neutral-800 dark:text-neutral-100" data-live-clock>${bdTimeStr()}</span>
+            </div>
+            <div class="flex items-center justify-between gap-3 rounded-xl bg-neutral-50 px-3.5 py-2.5 dark:bg-neutral-800/50">
+              <span class="text-[13px] text-neutral-500 dark:text-neutral-400">Clock status</span>
+              <span class="text-[13.5px] font-medium text-neutral-800 dark:text-neutral-100">${Math.abs(getClockDrift()) > 5 * 60 * 1000 ? 'Device clock is off — using synced time' : 'Device clock looks correct'}</span>
+            </div>
+          </div>
+          <p class="mt-2.5 text-[12.5px] leading-relaxed text-neutral-500 dark:text-neutral-400">ZLife shows the true Bangladesh date even if your phone or PC clock is wrong — it syncs the time automatically when online (and uses the last known good sync offline).</p>
+          <button type="button" class="btn btn-secondary mt-3 px-3 py-1.5 text-[13px]" data-action="resync-time">${icon('repeat', 'h-3.5 w-3.5')}Sync time now</button>
+        </section>
+
         <!-- Appearance -->
         <section class="card px-5 py-4">
           <h2 class="mb-3 flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">${icon('sun', 'h-4 w-4')}Appearance</h2>
@@ -171,6 +192,12 @@ export function onViewClick(e) {
     });
   } else if (action === 'export-data') {
     exportData();
+  } else if (action === 'resync-time') {
+    toast('Syncing time…', { type: 'info' });
+    syncClock(true).then((drift) => {
+      render(document.getElementById('view'));
+      toast(Math.abs(drift) > 5 * 60 * 1000 ? 'Time synced — your device clock is off, calendars corrected.' : 'Time synced — device clock looks correct.', { type: 'success' });
+    });
   } else if (action === 'import-data') {
     document.getElementById('import-file').click();
   } else if (action === 'clear-data') {

@@ -3,7 +3,7 @@
 import * as state from './state.js';
 import { getSettings, applyTheme, trackThemeSystem } from './storage.js';
 import { icon } from './icons.js';
-import { todayStr, bdTimeStr } from './utils.js';
+import { todayStr, bdTimeStr, syncClock } from './utils.js';
 import { startScheduler } from './notifications.js';
 import { render, renderCurrent, bindGlobal, injectNavIcons } from './router.js';
 import { setRefresh } from './ui.js';
@@ -80,6 +80,16 @@ async function init() {
       el.textContent = t;
     });
   }, 1000);
+
+  // Correct the real time once we've measured the device-clock drift, so a
+  // phone/PC with a wrong date can't pin the calendars to the wrong month.
+  syncClock().then(() => {
+    const liveDay = todayStr();
+    if (liveDay !== lastDay) {
+      lastDay = liveDay;
+      renderCurrent(); // snap Today/calendars to the true BD day & month
+    }
+  });
 }
 
 init();

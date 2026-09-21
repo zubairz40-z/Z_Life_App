@@ -615,6 +615,20 @@ async function run() {
     check(saved.currency === 'USD' && saved.defaultReminderMin === 30, 'settings not saved: ' + JSON.stringify(saved));
   });
 
+  await step('Settings: date & time diagnostics show the live BD date', async () => {
+    const label = await evalv(`(() => {
+      const t = window.__zlifeToday();
+      const [y, m, d] = t.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      const wd = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][dt.getDay()];
+      const mo = ['January','February','March','April','May','June','July','August','September','October','November','December'][m - 1];
+      return wd + ', ' + mo + ' ' + d;
+    })()`);
+    check(await evalv(`document.body.innerText.includes('Bangladesh date')`), 'BD date row missing');
+    check(await evalv(`document.body.innerText.includes(${JSON.stringify(label)})`), `BD date not shown (expected ${label})`);
+    check(await evalv(`document.querySelector('[data-action="resync-time"]') !== null`), 'sync button missing');
+  });
+
   /* =============== 9. BACKUP =============== */
   await step('Backup: export produces a file', async () => {
     await click('[data-action="export-data"]');

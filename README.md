@@ -38,7 +38,7 @@ Open **http://localhost:4173** in any modern browser.
 | Command           | What it does                                              |
 | ----------------- | --------------------------------------------------------- |
 | `npm run build`   | Regenerate PNG icons + minified Tailwind CSS              |
-| `npm test`        | Run the headless-Chrome end-to-end suite (37 checks)      |
+| `npm test`        | Run the headless-Chrome end-to-end suite (38 checks)      |
 | `npm run icons:embed` | Regenerate `js/icons.js` from `lucide-static`         |
 | `npm run dev`     | `build:css` + serve                                       |
 
@@ -87,7 +87,9 @@ ZLife is fully static — no server code, no rewrites needed (routing is hash-ba
    - **Output Directory:** `.` (the prebuilt static site lives at the root)
 4. Click **Deploy**.
 
-Because the app is served over HTTPS, the service worker **will** install on Vercel, and on iOS the site becomes installable (see below). Update `sw.js`'s `CACHE` name (`'zlife-v4'`) whenever you ship a new version so clients pick up the fresh app shell.
+Because the app is served over HTTPS, the service worker **will** install on Vercel/Netlify, and on iOS the site becomes installable (see below). Update `sw.js`'s `CACHE` name (`'zlife-v5'`) whenever you ship a new version so clients pick up the fresh app shell.
+
+> **Date & time:** ZLife always shows the true *Bangladesh* date and time. If a device's clock is wrong, the app detects it — it syncs the time from an NTP-style source (`worldtimeapi.org`, Asia/Dhaka) once at startup (cached 24 h, graceful offline fallback) and marks "Auto-synced" in Settings → Date & time, where you can also tap **Sync time now**.
 
 > If you use the Vercel CLI instead: `npx vercel` (preview) → then `npx vercel --prod`.
 

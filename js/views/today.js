@@ -4,7 +4,7 @@ import * as state from '../state.js';
 import { getSettings } from '../storage.js';
 import {
   todayStr, fullDate, greeting, pickMotivation, esc, timeLabel, humanDate, dateTime,
-  isValidTimeStr, isValidDateStr, bdTimeStr, isHoliday, holidayName,
+  isValidTimeStr, isValidDateStr, bdTimeStr, isHoliday, holidayName, getClockDrift,
 } from '../utils.js';
 import { icon } from '../icons.js';
 import { openModal, toast, confirmDialog, setError, clearErrors } from '../ui.js';
@@ -92,6 +92,7 @@ export function render(container) {
         <div class="shrink-0 text-right">
           <p class="text-[11px] font-semibold uppercase tracking-wider text-white/70">Bangladesh</p>
           <p class="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[12px] font-semibold text-white">${icon('clock', 'h-3.5 w-3.5')}Dhaka · UTC+6</p>
+          ${Math.abs(getClockDrift()) > 5 * 60 * 1000 ? `<p class="mt-1.5 inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white">${icon('repeat', 'h-3 w-3')}Auto-synced</p>` : ''}
         </div>
       </div>
     </div>`);

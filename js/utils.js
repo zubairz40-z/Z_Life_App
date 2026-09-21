@@ -21,6 +21,63 @@ export function uid() {
 /** Bangladesh Standard Time (Asia/Dhaka) is fixed UTC+6 with no DST. */
 const BD_OFFSET_MS = 6 * 60 * 60 * 1000;
 
+/* ---------- Best-effort clock sync ----------
+   Phones/PCs can carry a wrong date. To keep every calendar & date "live",
+   we measure how far the device clock is from the real world (NTP-style
+   fetch, cached 24 h) and subtract that drift everywhere. Always resolves,
+   never throws, falls back to the device clock when offline. */
+
+let clockDriftMs = 0; // device clock is this far AHEAD of real UTC
+let syncPromise = null;
+const DRIFT_KEY = 'zlife.clockDrift';
+
+/** Measured drift of the device clock vs reality (ms, signed). */
+export function getClockDrift() {
+  return clockDriftMs;
+}
+
+/** Best-known current real time in ms since epoch. */
+export function syncedNow() {
+  return Date.now() - clockDriftMs;
+}
+
+/** Try to sync the clock against an NTP-like source (Asia/Dhaka).
+    force=true re-fetches even when a cached drift is available. */
+export function syncClock(force = false) {
+  if (syncPromise) return syncPromise;
+
+  // Use a previously cached drift (from a successful sync within 24 h).
+  if (!force) {
+    try {
+      const saved = localStorage.getItem(DRIFT_KEY);
+      if (saved) {
+        const { at, drift } = JSON.parse(saved);
+        if (Date.now() - at < 24 * 60 * 60 * 1000) clockDriftMs = Number(drift) || 0;
+      }
+    } catch { /* ignore */ }
+  }
+
+  syncPromise = fetch('https://worldtimeapi.org/api/timezone/Asia/Dhaka', { cache: 'no-store' })
+    .then((r) => {
+      if (!r.ok) throw new Error('time API response ' + r.status);
+      return r.json();
+    })
+    .then((j) => {
+      const ts = Number.isFinite(j?.unixtime) ? j.unixtime * 1000 : Date.parse(j?.datetime || '');
+      if (!Number.isFinite(ts)) throw new Error('bad time payload');
+      clockDriftMs = Date.now() - ts; // device ahead of reality by this much
+      try {
+        localStorage.setItem(DRIFT_KEY, JSON.stringify({ at: Date.now(), drift: clockDriftMs }));
+      } catch { /* ignore */ }
+      return clockDriftMs;
+    })
+    .catch(() => 0)
+    .finally(() => {
+      syncPromise = null;
+    });
+  return syncPromise;
+}
+
 /** Local date -> 'YYYY-MM-DD' (no UTC shifting). */
 export function toDateStr(d) {
   const y = d.getFullYear();
@@ -30,13 +87,13 @@ export function toDateStr(d) {
 }
 
 /**
- * The current instant expressed in Bangladesh Standard Time.
- * Returns a Date whose local (getFullYear/getMonth/...) components
- * equal the BD wall clock, so all date helpers stay consistent with
- * "today in Bangladesh" no matter what timezone the device is in.
+ * The current instant expressed in Bangladesh Standard Time (using the
+ * best-known real time, not the raw device clock). Returns a Date whose
+ * local components equal the BD wall clock, so all date helpers stay
+ * consistent no matter the device timezone — or its clock setting.
  */
 export function bdNow() {
-  const d = new Date();
+  const d = new Date(syncedNow());
   return new Date(d.getTime() + (d.getTimezoneOffset() + 360) * 60000);
 }
 
