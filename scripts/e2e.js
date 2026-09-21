@@ -311,7 +311,7 @@ async function run() {
   await step('Calendar: add an event', async () => {
     await evalv(`location.hash = '#/calendar'`);
     await waitFor(`document.querySelector('[data-action="cal-pick"]')`);
-    await click(`[data-action="cal-pick"]`);
+    await evalv(`(() => { const el = document.querySelector('[data-date="' + window.__zlifeToday() + '"]'); if (!el) return false; el.click(); return true; })()`);
     await waitFor(`document.querySelector('[data-action="add-event"]')`);
     await click('[data-action="add-event"]');
     await waitFor(`document.querySelector('#ev-title')`);
@@ -331,6 +331,9 @@ async function run() {
     // The "Today" button must reset the view back to the current BD month.
     await click('[data-action="cal-today"]');
     await waitFor(`document.querySelector('[data-month-label]').innerText === ${JSON.stringify(before)}`);
+    // The wall-calendar style "today" marker must sit on the current BD date.
+    check(await evalv(`document.querySelector('[data-date="' + window.__zlifeToday() + '"] [data-today-dot]') !== null`), 'today marker not on the current BD date');
+    check(await evalv(`document.body.textContent.includes('Today ·')`), 'header today note missing');
   });
 
   await step('Calendar: delete event', async () => {
@@ -383,7 +386,8 @@ async function run() {
   });
 
   await step('Tuition: add and complete a lesson', async () => {
-    await click(`[data-action="cal-pick"]`);
+    const picked = await evalv(`(() => { const el = document.querySelector('[data-date="' + window.__zlifeToday() + '"]'); if (!el) return false; el.click(); return true; })()`);
+    check(picked, 'today cell not found in tuition calendar');
     await waitFor(`document.querySelector('[data-action="add-lesson"]')`);
     await click('[data-action="add-lesson"]');
     await waitFor(`document.querySelector('#lesson-student')`);

@@ -1,13 +1,16 @@
 /* Shared monthly calendar grid used by the Calendar (events) and Tuition views. */
 
-import { monthGrid, todayStr, esc, monthLabel } from '../utils.js';
+import { monthGrid, todayStr, esc, monthLabel, currentMonthKey, WEEKDAYS_SHORT, MONTHS_SHORT } from '../utils.js';
 import { icon } from '../icons.js';
 
 /** dotsFor(dateStr) -> [{ cls, title }] */
 export function calendarGridHtml({ ym, sel, dotsFor }) {
-  const [y, m] = ym.split('-').map(Number);
+  const [y, m] = ym.split('-').map(Number); // m is 1-based (e.g. 9 = September)
   const today = todayStr();
-  const cells = monthGrid(y, m);
+  const cells = monthGrid(y, m - 1); // monthGrid expects a 0-based month index
+  const [ty, tm, td] = today.split('-').map(Number);
+  const todayDow = new Date(ty, tm - 1, td).getDay();
+  const showHeaderToday = ym === currentMonthKey();
 
   const grid = cells
     .map((c) => {
@@ -23,11 +26,21 @@ export function calendarGridHtml({ ym, sel, dotsFor }) {
         c.inMonth && isToday && !isSel
           ? `<span class="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-white shadow-sm dark:text-white">${c.day}</span>`
           : `<span>${c.day}</span>`;
+      // Marker dots: an always-visible "today" point (like a wall calendar)
+      // plus one dot per scheduled item on the date.
+      const markers = [];
+      if (c.inMonth && isToday) markers.push(`<span class="h-[5px] w-[5px] shrink-0 rounded-full ${isSel ? 'bg-white/90' : 'bg-accent'}" data-today-dot></span>`);
+      markers.push(...dots.slice(0, 3).map((d) => `<span class="h-[5px] w-[5px] shrink-0 rounded-full ${d.cls}"></span>`));
+      if (count > 3) markers.push(`<span class="text-[8px] font-semibold leading-none text-neutral-400 dark:text-neutral-500">${count}</span>`);
+      const markerHtml = markers.length
+        ? `<span class="mt-0.5 flex h-[5px] items-end justify-center gap-[3px]">${markers.join('')}</span>`
+        : '<span class="mt-[7px]"></span>';
       return `
         <button type="button" data-action="cal-pick" data-date="${c.date}"
-          aria-label="${esc(c.date)}${count ? ` — ${count} ${count === 1 ? 'item' : 'items'}` : ''}"
+          aria-label="${esc(c.date)}${isToday ? ' — today' : ''}${count ? ` — ${count} ${count === 1 ? 'item' : 'items'}` : ''}"
           class="cal-cell relative flex aspect-square flex-col items-center justify-center rounded-[10px] text-[13.5px] transition active:scale-95
           ${c.inMonth && isWeekend ? 'bg-accent-softest' : ''}
+          ${c.inMonth && isToday && !isSel ? 'today-ring bg-accent-softest' : ''}
           ${c.inMonth ? '' : 'text-neutral-300 dark:text-neutral-700'}
           ${isSel
             ? 'bg-accent text-white shadow-sm dark:text-white'
@@ -37,9 +50,7 @@ export function calendarGridHtml({ ym, sel, dotsFor }) {
                 ? 'text-neutral-800 hover:bg-neutral-100 dark:text-neutral-100 dark:hover:bg-neutral-800'
                 : 'hover:bg-neutral-50 dark:hover:bg-neutral-800/50'}">
           ${dayHtml}
-          ${count
-            ? `<span class="mt-0.5 flex h-[5px] items-end justify-center gap-[3px]">${dots.slice(0, 3).map((d) => `<span class="h-[5px] w-[5px] rounded-full ${d.cls}"></span>`).join('')}${count > 3 ? `<span class="text-[8px] font-semibold leading-none text-neutral-400 dark:text-neutral-500">${count}</span>` : ''}</span>`
-            : '<span class="mt-[7px]"></span>'}
+          ${markerHtml}
         </button>`;
     })
     .join('');
@@ -48,7 +59,10 @@ export function calendarGridHtml({ ym, sel, dotsFor }) {
     <div class="card overflow-hidden">
       <div class="flex items-center justify-between border-b border-neutral-100 px-3 py-2.5 dark:border-neutral-800">
         <button type="button" class="icon-btn !h-9 !w-9" data-action="cal-prev" aria-label="Previous month">${icon('chevronLeft', 'h-5 w-5')}</button>
-        <div class="text-[15.5px] font-bold text-neutral-900 dark:text-neutral-100" data-month-label>${monthLabel(ym)}</div>
+        <div class="text-center">
+          <div class="text-[15.5px] font-bold text-neutral-900 dark:text-neutral-100" data-month-label>${monthLabel(ym)}</div>
+          ${showHeaderToday ? `<p class="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-accent">Today · ${WEEKDAYS_SHORT[todayDow]} ${td} ${MONTHS_SHORT[tm - 1]}</p>` : ''}
+        </div>
         <button type="button" class="icon-btn !h-9 !w-9" data-action="cal-next" aria-label="Next month">${icon('chevronRight', 'h-5 w-5')}</button>
       </div>
       <div class="px-2.5 pb-2.5 pt-2">

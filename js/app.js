@@ -13,6 +13,9 @@ import { wireReminderToasts } from './views/settings.js';
 window.__zlifeIcon = (name, cls) => icon(name, cls);
 // Expose "today in Bangladesh Standard Time" so tests assert the right day.
 window.__zlifeToday = () => todayStr();
+// Expose the build version so you/we can instantly tell whether a device is
+// running the latest release (matches the service-worker cache name).
+window.__zlifeVersion = 'zlife-v6';
 
 function registerSW() {
   if (!('serviceWorker' in navigator)) return;
