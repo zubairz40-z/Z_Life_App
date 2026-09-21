@@ -1,0 +1,9 @@
+# Netlify build settings — ZLife is fully static; the build regenerates
+# the Tailwind CSS and PNG icons that are gitignored.
+
+[build]
+  command = "npm run build"
+  publish = "."
+
+[build.environment]
+  NODE_VERSION = "20"
