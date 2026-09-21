@@ -1,0 +1,20 @@
+{
+  "name": "zlife",
+  "version": "1.0.0",
+  "description": "ZLife — Your life, organized. A personal life-management PWA.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "icons:embed": "node scripts/embed-icons.js",
+    "icons:png": "node scripts/generate-icons.js",
+    "build:css": "tailwindcss -i ./src/input.css -o ./css/styles.css --minify",
+    "build": "npm run icons:png && npm run build:css",
+    "test": "node scripts/e2e.js",
+    "dev": "npm run build:css && node scripts/serve.js",
+    "start": "node scripts/serve.js"
+  },
+  "devDependencies": {
+    "lucide-static": "^0.468.0",
+    "tailwindcss": "^3.4.17"
+  }
+}

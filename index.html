@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ZLife — Your life, organized.</title>
+  <meta name="description" content="ZLife organizes your tasks, calendar, tuition, money and fitness — privately on your device." />
+  <meta name="theme-color" content="#fafafa" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="ZLife" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="./icons/favicon-32.png" />
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body>
+  <noscript>
+    <p style="padding: 24px; font-family: system-ui, sans-serif; text-align: center">
+      ZLife needs JavaScript to run. Please enable it to continue.
+    </p>
+  </noscript>
+
+  <div id="app" class="min-h-dvh">
+    <!-- Desktop sidebar -->
+    <aside id="sidebar" aria-label="Main navigation" class="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col border-r border-neutral-200 bg-white lg:flex dark:border-neutral-800 dark:bg-neutral-950 pl-safe">
+      <div class="flex items-center gap-2.5 px-5 pb-5 pt-6">
+        <span class="brand-mark flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true"><path d="M4 4h16v3.4L10.4 20.6H20V24H4v-3.4L13.6 4.4H4V4z"/></svg>
+        </span>
+        <div class="leading-tight">
+          <p class="text-[16px] font-bold tracking-tight text-neutral-900 dark:text-white">ZLife</p>
+          <p class="text-[11px] text-neutral-400 dark:text-neutral-500">Your life, organized.</p>
+        </div>
+      </div>
+      <nav class="flex-1 space-y-1 px-3">
+        <button type="button" data-nav="today" class="nav-item nav-item-side" aria-current="false">
+          <span class="nav-ic"></span><span class="nav-lbl">Today</span>
+        </button>
+        <button type="button" data-nav="calendar" class="nav-item nav-item-side" aria-current="false">
+          <span class="nav-ic"></span><span class="nav-lbl">Calendar</span>
+        </button>
+        <button type="button" data-nav="tuition" class="nav-item nav-item-side" aria-current="false">
+          <span class="nav-ic"></span><span class="nav-lbl">Tuition</span>
+        </button>
+        <button type="button" data-nav="money" class="nav-item nav-item-side" aria-current="false">
+          <span class="nav-ic"></span><span class="nav-lbl">Money</span>
+        </button>
+        <button type="button" data-nav="fitness" class="nav-item nav-item-side" aria-current="false">
+          <span class="nav-ic"></span><span class="nav-lbl">Fitness</span>
+        </button>
+        <button type="button" data-nav="notes" class="nav-item nav-item-side" aria-current="false">
+          <span class="nav-ic"></span><span class="nav-lbl">Notes</span>
+        </button>
+        <button type="button" data-nav="settings" class="nav-item nav-item-side" aria-current="false">
+          <span class="nav-ic"></span><span class="nav-lbl">Settings</span>
+        </button>
+      </nav>
+      <div class="border-t border-neutral-100 px-5 py-4 dark:border-neutral-800">
+        <p class="text-[11.5px] text-neutral-400 dark:text-neutral-500">All data stays on this device.</p>
+      </div>
+    </aside>
+
+    <!-- Content -->
+    <div class="flex min-h-dvh flex-col lg:pl-60">
+      <main id="view" class="min-h-dvh flex-1"></main>
+    </div>
+
+    <!-- Mobile bottom navigation -->
+    <nav id="bottomnav" aria-label="Main navigation" class="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200 bg-white/95 pb-safe backdrop-blur lg:hidden dark:border-neutral-800 dark:bg-neutral-950/95">
+      <div class="grid grid-cols-7">
+        <button type="button" data-nav="today" class="nav-item nav-item-bottom" aria-current="false">
+          <span class="nav-ic"></span><span class="nav-lbl">Today</span>
+        </button>
+        <button type="button" data-nav="calendar" class="nav-item nav-item-bottom" aria-current="false">
+          <span class="nav-ic"></span><span class="nav-lbl">Calendar</span>
+        </button>
+        <button type="button" data-nav="tuition" class="nav-item nav-item-bottom" aria-current="false">
+          <span class="nav-ic"></span><span class="nav-lbl">Tuition</span>
+        </button>
+        <button type="button" data-nav="money" class="nav-item nav-item-bottom" aria-current="false">
+          <span class="nav-ic"></span><span class="nav-lbl">Money</span>
+        </button>
+        <button type="button" data-nav="fitness" class="nav-item nav-item-bottom" aria-current="false">
+          <span class="nav-ic"></span><span class="nav-lbl">Fitness</span>
+        </button>
+        <button type="button" data-nav="notes" class="nav-item nav-item-bottom" aria-current="false">
+          <span class="nav-ic"></span><span class="nav-lbl">Notes</span>
+        </button>
+        <button type="button" data-nav="settings" class="nav-item nav-item-bottom" aria-current="false">
+          <span class="nav-ic"></span><span class="nav-lbl">Settings</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
