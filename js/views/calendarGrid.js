@@ -13,7 +13,8 @@ export function calendarGridHtml({ ym, sel, dotsFor }) {
     .map((c) => {
       const [yy, mm, dd] = c.date.split('-').map(Number);
       const dow = new Date(yy, mm - 1, dd).getDay();
-      const isWeekend = dow === 0 || dow === 6;
+      // Bangladesh weekly holidays: Friday (5) & Saturday (6).
+      const isWeekend = dow === 5 || dow === 6;
       const dots = dotsFor(c.date) || [];
       const count = dots.length;
       const isSel = c.date === sel;
@@ -55,11 +56,12 @@ export function calendarGridHtml({ ym, sel, dotsFor }) {
           ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
             .map(
               (d, i) =>
-                `<span class="py-0.5 text-center text-[11px] font-bold uppercase tracking-wide ${i === 0 || i === 6 ? 'text-accent' : 'text-neutral-400 dark:text-neutral-500'}">${d}</span>`
+                `<span class="py-0.5 text-center text-[11px] font-bold uppercase tracking-wide ${i === 5 || i === 6 ? 'text-accent' : 'text-neutral-400 dark:text-neutral-500'}">${d}</span>`
             )
             .join('')}
         </div>
         <div class="grid grid-cols-7 gap-y-0.5">${grid}</div>
+        <p class="mt-2 flex items-center justify-center gap-1.5 border-t border-neutral-100 pt-2 text-[11px] font-medium text-neutral-400 dark:border-neutral-800 dark:text-neutral-500">${icon('sun', 'h-3 w-3')}Friday &amp; Saturday are weekly holidays</p>
       </div>
     </div>`;
 }

@@ -3,7 +3,8 @@
 import * as state from '../state.js';
 import { getSettings } from '../storage.js';
 import {
-  todayStr, fullDate, greeting, pickMotivation, esc, timeLabel, humanDate, dateTime, isValidTimeStr, isValidDateStr,
+  todayStr, fullDate, greeting, pickMotivation, esc, timeLabel, humanDate, dateTime,
+  isValidTimeStr, isValidDateStr, bdTimeStr, isHoliday, holidayName,
 } from '../utils.js';
 import { icon } from '../icons.js';
 import { openModal, toast, confirmDialog, setError, clearErrors } from '../ui.js';
@@ -45,6 +46,11 @@ function taskRowHtml(t, { overdue = false } = {}) {
         ${t.note ? `<span class="mt-0.5 block truncate text-[13px] text-neutral-500 dark:text-neutral-400 ${done ? 'text-neutral-400/70' : ''}">${esc(t.note)}</span>` : ''}
         ${chips.length ? `<span class="mt-2 flex flex-wrap items-center gap-1.5">${chips.join('')}</span>` : ''}
       </span>
+      <span role="button" tabindex="0" data-action="delete-task" data-id="${esc(t.id)}"
+        aria-label="Delete task"
+        class="ml-1 mt-1 flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-xl text-neutral-300 transition hover:bg-red-50 hover:text-red-600 active:scale-95 dark:text-neutral-600 dark:hover:bg-red-500/10 dark:hover:text-red-400">
+        ${icon('trash', 'h-4 w-4')}
+      </span>
     </button>`;
 }
 
@@ -72,8 +78,23 @@ export function render(container) {
   const sections = [];
 
   sections.push(
-    viewHeader({ title: 'Today', subtitle: `${greeting()} · ${fullDate(today)}`, iconName: 'home', action: addBtn })
+    viewHeader({ title: 'Today', subtitle: `${fullDate(today)}${isHoliday(today) ? ` · ${holidayName(today)} holiday` : ''}`, iconName: 'home', action: addBtn })
   );
+
+  // Live Bangladesh clock.
+  sections.push(`
+    <div class="relative mb-5 overflow-hidden rounded-2xl bg-accent-grad p-4 text-white shadow-sm">
+      <div class="flex items-center justify-between gap-4">
+        <div class="min-w-0">
+          <p class="flex items-center gap-1.5 text-[13.5px] font-semibold text-white/90">${icon('sparkles', 'h-4 w-4')}${greeting()}</p>
+          <p class="mt-1.5 font-mono text-[33px] font-bold leading-none tracking-tight text-white tabular-nums sm:text-[38px]" data-live-clock>${bdTimeStr()}</p>
+        </div>
+        <div class="shrink-0 text-right">
+          <p class="text-[11px] font-semibold uppercase tracking-wider text-white/70">Bangladesh</p>
+          <p class="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[12px] font-semibold text-white">${icon('clock', 'h-3.5 w-3.5')}Dhaka · UTC+6</p>
+        </div>
+      </div>
+    </div>`);
 
   // Progress card
   const progressLabel =
@@ -326,5 +347,19 @@ export function onViewClick(e) {
     if (!t) return;
     state.toggleTask(id);
     if (!t.completed) toast(pickMotivation(todayStr()), { type: 'motivation' });
+  } else if (action === 'delete-task') {
+    e.stopPropagation();
+    const t = state.getData().tasks.find((x) => x.id === id);
+    if (!t) return;
+    confirmDialog({
+      title: 'Delete task',
+      message: `Delete “${t.title}”? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+    }).then(async (yes) => {
+      if (!yes) return;
+      await state.deleteTask(id);
+      toast('Task deleted', { type: 'success' });
+    });
   }
 }

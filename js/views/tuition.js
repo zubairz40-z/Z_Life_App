@@ -3,7 +3,7 @@
 import * as state from '../state.js';
 import { getSettings, saveSettings, STUDENT_COLORS, studentColorById } from '../storage.js';
 import {
-  esc, todayStr, currentMonthKey, fullDate, timeLabel, isValidTimeStr, isValidDateStr,
+  esc, todayStr, currentMonthKey, fullDate, timeLabel, isValidTimeStr, isValidDateStr, isHoliday, holidayName,
 } from '../utils.js';
 import { icon } from '../icons.js';
 import { openModal, toast, confirmDialog, setError, clearErrors, refresh } from '../ui.js';
@@ -63,7 +63,10 @@ export function render(container) {
     ? ` 
       <div class="card mb-6">
         <div class="flex items-center justify-between border-b border-neutral-100 px-4 py-3 dark:border-neutral-800">
-          <h2 class="text-[15px] font-semibold text-neutral-900 dark:text-neutral-100">${fullDate(sel)}</h2>
+          <div class="flex min-w-0 flex-wrap items-center gap-2">
+            <h2 class="text-[15px] font-semibold text-neutral-900 dark:text-neutral-100">${fullDate(sel)}</h2>
+            ${isHoliday(sel) ? `<span class="chip bg-accent-soft text-accent">${icon('sun', 'h-3 w-3')}${holidayName(sel)} holiday</span>` : ''}
+          </div>
           <button type="button" class="btn btn-primary px-3 py-1.5 text-[13px]" data-action="add-lesson">${icon('plus', 'h-4 w-4')}Lesson</button>
         </div>
         ${students.length
@@ -87,7 +90,11 @@ export function render(container) {
         title: 'Tuition',
         subtitle: 'Your personal tuition calendar',
         iconName: 'bookOpen',
-        action: `<button type="button" class="btn btn-secondary px-3.5 py-2 text-sm" data-action="manage-students">${icon('users', 'h-4 w-4')}Students</button>`,
+        action: `
+        <div class="flex gap-2">
+          <button type="button" class="btn btn-secondary px-3 py-2 text-sm" data-action="cal-today">${icon('calendarDays', 'h-4 w-4')}Today</button>
+          <button type="button" class="btn btn-secondary px-3.5 py-2 text-sm" data-action="manage-students">${icon('users', 'h-4 w-4')}Students</button>
+        </div>`,
       })}
       ${calendarGridHtml({ ym, sel, dotsFor })}
       ${legend}
@@ -454,6 +461,7 @@ export function onViewClick(e) {
   const { action, id, date } = target.dataset;
   if (action === 'cal-prev') { ym = calMonthKey(ym, -1); refresh(); }
   else if (action === 'cal-next') { ym = calMonthKey(ym, 1); refresh(); }
+  else if (action === 'cal-today') { ym = currentMonthKey(); sel = todayStr(); refresh(); }
   else if (action === 'cal-pick') { sel = date; refresh(); }
   else if (action === 'manage-students') openStudentsManager();
   else if (action === 'add-student') openStudentForm();

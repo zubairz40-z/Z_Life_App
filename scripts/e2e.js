@@ -262,6 +262,13 @@ async function run() {
     check(await evalv(`document.body.innerText.includes('Chapter 4')`), 'note not shown');
   });
 
+  await step('Today: live clock shows BD time and ticks', async () => {
+    const t1 = await evalv(`document.querySelector('[data-live-clock]').textContent`);
+    check(/^\d{1,2}:\d{2}:\d{2} (AM|PM)$/.test(t1), `clock format wrong: ${t1}`);
+    await waitFor(`document.querySelector('[data-live-clock]').textContent !== ${JSON.stringify(t1)}`, 4000);
+    check(await evalv(`document.body.innerText.includes('Dhaka') && document.body.innerText.includes('UTC+6')`), 'timezone chip missing');
+  });
+
   await step('Today: progress updates after completing', async () => {
     await click(`[data-action="toggle-task"]`);
     await waitFor(`document.body.innerText.includes('1 of 1')`);
@@ -278,12 +285,10 @@ async function run() {
     await waitFor(`document.body.innerText.includes('Study JavaScript (advanced)')`);
   });
 
-  await step('Today: uncomplete then delete', async () => {
+  await step('Today: uncomplete then delete via row button', async () => {
     await click('[data-action="toggle-task"]'); // uncomplete
     await waitFor(`!document.body.innerText.includes('1 of 1')`);
-    await click('[data-action="open-task"]');
-    await waitFor(`document.querySelector('[data-delete]')`);
-    await click('[data-delete]');
+    await click('[data-action="delete-task"]');
     await waitFor(`document.querySelector('[data-ok]')`);
     await click('[data-ok]');
     await waitFor(`!document.body.innerText.includes('Study JavaScript')`);
@@ -337,6 +342,20 @@ async function run() {
     await waitFor(`!document.body.innerText.includes('CSE Assignment')`);
   });
 
+  await step('Calendar: Friday/Saturday are marked as holidays', async () => {
+    check(await evalv(`document.body.innerText.includes('weekly holidays')`), 'holiday legend missing');
+    const tinted = await evalv(`(() => {
+      const cells = [...document.querySelectorAll('.cal-cell')].filter((c) => c.classList.contains('bg-accent-softest'));
+      if (!cells.length) return 'none';
+      const bad = cells.filter((c) => {
+        const w = new Date(c.dataset.date + 'T00:00:00').getDay();
+        return w !== 5 && w !== 6;
+      });
+      return bad.length ? bad.map((c) => c.dataset.date + ' dow=' + new Date(c.dataset.date + 'T00:00:00').getDay()).join(',') : 'ok';
+    })()`);
+    check(tinted === 'ok', 'holiday tint on wrong days: ' + tinted);
+  });
+
   /* =============== 5. TUITION =============== */
   await step('Tuition: add two students', async () => {
     await evalv(`location.hash = '#/tuition'`);
@@ -384,6 +403,20 @@ async function run() {
     await waitFor(`document.querySelector('[data-edit]')`);
     check(await evalv(`document.body.innerText.includes('Completed')`), 'status not shown');
     await click('[data-close], [data-close]');
+  });
+
+  await step('Tuition: Today button jumps back to current month', async () => {
+    const before = await evalv(`document.querySelector('[data-month-label]').innerText`);
+    await click('[data-action="cal-next"]');
+    await waitFor(`document.querySelector('[data-month-label]').innerText !== ${JSON.stringify(before)}`);
+    await click('[data-action="cal-today"]');
+    await waitFor(`document.querySelector('[data-month-label]').innerText === ${JSON.stringify(before)}`);
+    check(await evalv(`document.querySelector('[data-month-label]').innerText === ${JSON.stringify(before)}`), 'month not back to current');
+  });
+
+  await step('Tuition: calendar shows holiday legend and Today button', async () => {
+    check(await evalv(`document.body.innerText.includes('weekly holidays')`), 'tuition holiday legend missing');
+    check(await evalv(`document.querySelector('[data-action="cal-today"]') !== null`), 'tuition Today button missing');
   });
 
   await shot('tuition');

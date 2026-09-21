@@ -94,6 +94,29 @@ export function fullDate(str) {
   return `${WEEKDAYS_LONG[d.getDay()]}, ${humanDate(str)}`;
 }
 
+/** Bangladesh weekly holidays are Friday & Saturday (work week is Sun–Thu). */
+export function isHoliday(str) {
+  const d = parseDate(str);
+  if (!d) return false;
+  const dow = d.getDay();
+  return dow === 5 || dow === 6;
+}
+
+/** 'YYYY-MM-DD' -> 'Friday' / 'Saturday' when it's a BD holiday, else null. */
+export function holidayName(str) {
+  if (!isHoliday(str)) return null;
+  return WEEKDAYS_LONG[parseDate(str).getDay()];
+}
+
+/** Live BD wall-clock, e.g. '9:22:17 PM' (ticked every second). */
+export function bdTimeStr() {
+  const n = bdNow();
+  const h24 = n.getHours();
+  const ap = h24 >= 12 ? 'PM' : 'AM';
+  const h = h24 % 12 === 0 ? 12 : h24 % 12;
+  return `${h}:${String(n.getMinutes()).padStart(2, '0')}:${String(n.getSeconds()).padStart(2, '0')} ${ap}`;
+}
+
 /** Combined date + time -> Date at the exact instant those values mean in
     Bangladesh Standard Time (the stored dates are BD calendar dates). */
 export function dateTime(str, timeStr) {

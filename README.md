@@ -38,7 +38,7 @@ Open **http://localhost:4173** in any modern browser.
 | Command           | What it does                                              |
 | ----------------- | --------------------------------------------------------- |
 | `npm run build`   | Regenerate PNG icons + minified Tailwind CSS              |
-| `npm test`        | Run the headless-Chrome end-to-end suite (33 checks)      |
+| `npm test`        | Run the headless-Chrome end-to-end suite (37 checks)      |
 | `npm run icons:embed` | Regenerate `js/icons.js` from `lucide-static`         |
 | `npm run dev`     | `build:css` + serve                                       |
 
@@ -87,7 +87,7 @@ ZLife is fully static — no server code, no rewrites needed (routing is hash-ba
    - **Output Directory:** `.` (the prebuilt static site lives at the root)
 4. Click **Deploy**.
 
-Because the app is served over HTTPS, the service worker **will** install on Vercel, and on iOS the site becomes installable (see below). Update `sw.js`'s `CACHE` name (`'zlife-v2'`) whenever you ship a new version so clients pick up the fresh app shell.
+Because the app is served over HTTPS, the service worker **will** install on Vercel, and on iOS the site becomes installable (see below). Update `sw.js`'s `CACHE` name (`'zlife-v4'`) whenever you ship a new version so clients pick up the fresh app shell.
 
 > If you use the Vercel CLI instead: `npx vercel` (preview) → then `npx vercel --prod`.
 

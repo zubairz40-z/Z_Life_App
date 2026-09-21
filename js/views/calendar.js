@@ -4,6 +4,7 @@ import * as state from '../state.js';
 import { getSettings } from '../storage.js';
 import {
   esc, todayStr, currentMonthKey, fullDate, humanDate, timeLabel, dateTime, isValidDateStr, isValidTimeStr,
+  isHoliday, holidayName,
 } from '../utils.js';
 import { icon } from '../icons.js';
 import { openModal, toast, confirmDialog, setError, clearErrors, refresh } from '../ui.js';
@@ -35,6 +36,7 @@ export function render(container) {
 
   const selLabel = sel ? fullDate(sel) : 'Pick a date';
   const countLabel = events.length ? `${events.length} ${events.length === 1 ? 'event' : 'events'}` : '';
+  const holChip = sel && isHoliday(sel) ? `<span class="chip bg-accent-soft text-accent">${icon('sun', 'h-3 w-3')}${holidayName(sel)} holiday</span>` : '';
 
   const dayPanel = sel
     ? `
@@ -42,6 +44,7 @@ export function render(container) {
         <div class="flex items-center justify-between border-b border-neutral-100 px-4 py-3 dark:border-neutral-800">
           <h2 class="text-[15px] font-semibold text-neutral-900 dark:text-neutral-100">${selLabel}</h2>
           <div class="flex items-center gap-2">
+            ${holChip}
             ${countLabel ? `<span class="chip bg-accent-soft text-accent">${countLabel}</span>` : ''}
             <button type="button" class="btn btn-primary px-3 py-1.5 text-[13px]" data-action="add-event">${icon('plus', 'h-4 w-4')}Add</button>
           </div>

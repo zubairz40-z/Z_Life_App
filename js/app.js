@@ -3,7 +3,7 @@
 import * as state from './state.js';
 import { getSettings, applyTheme, trackThemeSystem } from './storage.js';
 import { icon } from './icons.js';
-import { todayStr } from './utils.js';
+import { todayStr, bdTimeStr } from './utils.js';
 import { startScheduler } from './notifications.js';
 import { render, renderCurrent, bindGlobal, injectNavIcons } from './router.js';
 import { setRefresh } from './ui.js';
@@ -62,6 +62,24 @@ async function init() {
   wireReminderToasts();
   startScheduler(() => state.getData());
   registerSW();
+
+  // Roll today over automatically when the BD date changes (e.g. app left open at midnight).
+  let lastDay = todayStr();
+  setInterval(() => {
+    const day = todayStr();
+    if (day !== lastDay) {
+      lastDay = day;
+      renderCurrent();
+    }
+  }, 60000);
+
+  // Live Bangladesh clock — updates every [data-live-clock] element (Today view) once per second.
+  setInterval(() => {
+    const t = bdTimeStr();
+    document.querySelectorAll('[data-live-clock]').forEach((el) => {
+      el.textContent = t;
+    });
+  }, 1000);
 }
 
 init();

@@ -1,6 +1,6 @@
 /* ZLife service worker — offline-first app shell caching. */
 
-const CACHE = 'zlife-v2';
+const CACHE = 'zlife-v4';
 const CORE = [
   './',
   './index.html',
